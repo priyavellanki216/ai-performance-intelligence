@@ -2,6 +2,8 @@
  * Evidence Ledger style: an asymmetric editorial case file that makes source-linked evidence,
  * human approval, warm paper surfaces, ledger rules, and Verdict Blue (#2456E8) visible throughout.
  */
+import { useState } from "react";
+import MetricLab from "@/components/MetricLab";
 import {
   ArrowDownRight,
   ArrowUpRight,
@@ -21,7 +23,7 @@ const metrics = [
   { value: "18,420", label: "performance records indexed", note: "benchmark corpus" },
   { value: "76.8K", label: "feedback entries synthesized", note: "benchmark corpus" },
   { value: "94.6%", label: "factual consistency", note: "1,250-draft rubric" },
-  { value: "142 ms", label: "median API latency", note: "180 virtual users" },
+  { value: "150 ms", label: "median API latency", note: "180 virtual users" },
 ];
 
 const outcomes = [
@@ -43,11 +45,31 @@ const outcomes = [
 ];
 
 const bullets = [
-  "Built an AI-assisted HR performance intelligence platform that indexed 18,420 employee performance records and 76,800 feedback entries, producing evidence-linked performance-review drafts for human approval.",
-  "Designed PostgreSQL data models plus Django and FastAPI services that reached 142 ms p50 and 298 ms p95 API latency under a reproducible 180-concurrent-user load test.",
-  "Evaluated 1,250 generated performance-review drafts with a structured source-grounding rubric, recording 94.6% factual consistency against the benchmark HR dataset.",
-  "Reduced repeat AI processing by 61% using Redis cache signatures and introduced validation plus human-approval workflows before review drafts could be released.",
-  "Built automated tests covering 87% of critical backend workflows and deployed decoupled application components on AWS."
+  {
+    summary: "Built an AI-assisted HR performance intelligence platform that indexed 18,420 employee performance records and 76,800 feedback entries, producing evidence-linked performance-review drafts for human approval.",
+    technologies: ["Django", "PostgreSQL", "LangChain", "OpenAI API"],
+    detail: "Django coordinated review workflows while PostgreSQL preserved source-record relationships and LangChain assembled evidence for model calls.",
+  },
+  {
+    summary: "Designed PostgreSQL data models plus Django and FastAPI services that reached 150 ms p50 and 310 ms p95 API latency under a reproducible 180-concurrent-user load test.",
+    technologies: ["FastAPI", "PostgreSQL", "Redis", "k6"],
+    detail: "FastAPI handled the latency-sensitive review route; Redis absorbed repeat work while PostgreSQL served indexed source records under load.",
+  },
+  {
+    summary: "Evaluated 1,250 generated performance-review drafts with a structured source-grounding rubric, recording 94.6% factual consistency against the benchmark HR dataset.",
+    technologies: ["Python", "OpenAI API", "LangChain", "PostgreSQL"],
+    detail: "A Python evaluation harness compared draft claims with retrieved evidence and persisted rubric outcomes for repeatable review.",
+  },
+  {
+    summary: "Reduced repeat AI processing by 61% using Redis cache signatures and introduced validation plus human-approval workflows before review drafts could be released.",
+    technologies: ["Redis", "Django", "FastAPI", "React"],
+    detail: "Redis signature keys avoided duplicate model work; Django and React exposed validation states before reviewers could approve a draft.",
+  },
+  {
+    summary: "Built automated tests covering 87% of critical backend workflows and deployed decoupled application components on AWS.",
+    technologies: ["pytest", "FastAPI", "AWS ECS", "PostgreSQL"],
+    detail: "Contract and workflow tests protected review pathways, while containerized services kept the application components independently deployable.",
+  },
 ];
 
 const architecture = [
@@ -58,6 +80,8 @@ const architecture = [
 ];
 
 export default function Home() {
+  const [openBullet, setOpenBullet] = useState<number | null>(null);
+
   return (
     <div className="min-h-screen overflow-hidden bg-[#f6f2e9] text-[#1d211f]">
       <header className="site-header">
@@ -75,6 +99,7 @@ export default function Home() {
         <nav className="hidden items-center gap-7 text-[0.7rem] font-bold uppercase tracking-[0.16em] text-[#4e554f] md:flex" aria-label="Primary navigation">
           <a href="#brief" className="nav-link">Case brief</a>
           <a href="#system" className="nav-link">System</a>
+          <a href="#metrics-lab" className="nav-link">Metrics lab</a>
           <a href="#outcomes" className="nav-link">Impact</a>
         </nav>
         <a href="#outcomes" className="approval-pill">
@@ -142,6 +167,8 @@ export default function Home() {
             ))}
           </div>
         </section>
+
+        <MetricLab />
 
         <section id="system" className="system-section">
           <div className="system-heading">
@@ -214,14 +241,28 @@ export default function Home() {
           <div className="bullet-heading">
             <p className="eyebrow"><span className="eyebrow-dot" /> Resume-ready draft</p>
             <h2>Refined achievement<br /><em>bullets.</em></h2>
-            <p>These are polished, metric-complete portfolio bullets based on the benchmark scenario shown above. They should be substantiated or adjusted before being presented as your own production results.</p>
+            <p>Hover or tap a bullet to inspect the technologies behind its metric. These benchmark-oriented statements should be substantiated or adjusted before being presented as your own production results.</p>
           </div>
           <div className="bullet-list">
             {bullets.map((bullet, index) => (
-              <article className="bullet-item" key={bullet}>
+              <button
+                type="button"
+                className={`bullet-item ${openBullet === index ? "is-open" : ""}`}
+                key={bullet.summary}
+                aria-expanded={openBullet === index}
+                onClick={() => setOpenBullet(openBullet === index ? null : index)}
+              >
                 <span>0{index + 1}</span>
-                <p>{bullet}</p>
-              </article>
+                <span className="bullet-copy">
+                  <span className="bullet-summary">{bullet.summary}</span>
+                  <span className="bullet-reveal">
+                    <span className="reveal-label">Metric enablers</span>
+                    <span className="technology-tags">{bullet.technologies.map((technology) => <span key={technology}>{technology}</span>)}</span>
+                    <small>{bullet.detail}</small>
+                  </span>
+                </span>
+                <ArrowDownRight className="bullet-arrow" size={18} aria-hidden="true" />
+              </button>
             ))}
           </div>
         </section>
